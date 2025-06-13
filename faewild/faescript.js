@@ -114,20 +114,19 @@ function updateColorTemperature() {
 updateColorTemperature();
 setInterval(updateColorTemperature, 5 * 60 * 1000);
 
-// --- 3D Y-Axis (Wheel) Text Carousel Setup ---
+// --- 3D Y-Axis Text Carousel with Drag, Inertia, Real-Time Mouse Velocity, and Grace Period ---
 
 const carousel = document.getElementById('carousel');
 const texts = ['F', 'A', 'E', 'W', 'I', 'L', 'D']; // Example text
-const radius = 120; // Distance from center for 3D effect
+const radius = 120;
 const itemCount = texts.length;
 
-// Create and position text elements around the Y axis, facing outward
+// Create and position text elements
 texts.forEach((text, i) => {
   const el = document.createElement('div');
   el.className = 'carousel-text';
   el.textContent = text;
   const angle = (360 / itemCount) * i;
-  // Outward-facing: rotateY(angle), push out, then rotateY(-angle)
   el.style.transform = `rotateY(${angle}deg) translateZ(${radius}px) rotateY(${-angle}deg)`;
   carousel.appendChild(el);
 });
@@ -141,19 +140,24 @@ let lastMouseX = 0;
 let lastTimestamp = 0;
 
 // --- Real-time velocity based on mouse position ---
-let hoverVelocity = 0;         // Set by mouse position
-const maxVelocity = 2.5;       // Maximum velocity (deg/frame) for hover
-const minVelocity = 0.18;      // Default auto-spin velocity (deg/frame)
-let useHoverVelocity = false;  // Whether to use hover velocity
-let resumeSpinDirection = 1;   // 1 is right, -1 is left
+let hoverVelocity = 0;
+const maxVelocity = 2.5;   // Maximum velocity (deg/frame) when hovering
+const minVelocity = 0.18;  // Default auto-spin velocity (deg/frame)
+let useHoverVelocity = false;
+let resumeSpinDirection = 1; // 1 is right, -1 is left
 
-// Drag events
+// --- Grace period after dragging ---
+let graceTimeout = null;
+const gracePeriod = 400; // ms, adjust as needed
+
+// Mouse drag events
 carouselContainer.addEventListener('mousedown', (e) => {
   isDragging = true;
   lastMouseX = e.clientX;
   velocityY = 0;
   lastTimestamp = performance.now();
   useHoverVelocity = false;
+  if (graceTimeout) clearTimeout(graceTimeout);
   e.preventDefault();
 });
 
@@ -170,7 +174,15 @@ window.addEventListener('mousemove', (e) => {
 });
 
 window.addEventListener('mouseup', () => {
-  isDragging = false;
+  if (isDragging) {
+    isDragging = false;
+    useHoverVelocity = false;
+    if (graceTimeout) clearTimeout(graceTimeout);
+    graceTimeout = setTimeout(() => {
+      useHoverVelocity = true;
+      graceTimeout = null;
+    }, gracePeriod);
+  }
 });
 
 // Touch support
@@ -180,6 +192,7 @@ carouselContainer.addEventListener('touchstart', (e) => {
   velocityY = 0;
   lastTimestamp = performance.now();
   useHoverVelocity = false;
+  if (graceTimeout) clearTimeout(graceTimeout);
 });
 window.addEventListener('touchmove', (e) => {
   if (!isDragging) return;
@@ -193,20 +206,27 @@ window.addEventListener('touchmove', (e) => {
   lastTimestamp = now;
 });
 window.addEventListener('touchend', () => {
-  isDragging = false;
+  if (isDragging) {
+    isDragging = false;
+    useHoverVelocity = false;
+    if (graceTimeout) clearTimeout(graceTimeout);
+    graceTimeout = setTimeout(() => {
+      useHoverVelocity = true;
+      graceTimeout = null;
+    }, gracePeriod);
+  }
 });
 
-// Real-time velocity and direction on mousemove (while not dragging)
+// Real-time velocity and direction on mousemove (while not dragging and after grace period)
 carouselContainer.addEventListener('mousemove', (e) => {
-  if (isDragging) return;
+  if (isDragging || !useHoverVelocity) return;
   const rect = carouselContainer.getBoundingClientRect();
   const x = e.clientX - rect.left;
   const center = rect.width / 2;
   // Range from -1 (left) to +1 (right)
   const rel = (x - center) / center;
   hoverVelocity = rel * maxVelocity;
-  useHoverVelocity = true;
-  // Remember direction for default spin
+  // Remember direction for default spin (in case mouse leaves)
   resumeSpinDirection = (rel < 0) ? -1 : 1;
 });
 
@@ -217,9 +237,8 @@ carouselContainer.addEventListener('mouseleave', () => {
 // Animation loop for rotating carousel around Y axis
 function animate() {
   if (isDragging) {
-    // Drag logic: handled in event listeners, inertia on release
     if (Math.abs(velocityY) > 0.01) {
-      rotationY += velocityY * 0.016; // frame time
+      rotationY += velocityY * 0.016;
       velocityY *= 0.93;
       if (Math.abs(velocityY) < 0.01) velocityY = 0;
     }
