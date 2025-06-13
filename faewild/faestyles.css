@@ -33,14 +33,32 @@ filter {
 }
 
 /* The rotating carousel wrapper */
+
+.carousel-container {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+  perspective: 1000px;
+  z-index: 10;
+  pointer-events: none; /* Let pointer events fall through to SVG if needed */
+}
+
+#carousel-mask-layer {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  /* Mask is assigned inline in HTML for browser compatibility */
+}
+
 #carousel {
   position: absolute;
   left: 50%;
-  top:30%;
+  top: 30%;
   transform-style: preserve-3d;
 }
 
-/* Each repeated text element */
 .carousel-text {
   position: absolute;
   top: 50%;
@@ -52,7 +70,7 @@ filter {
   text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
   white-space: nowrap;
   user-select: none;
-  pointer-events: none; /* Prevent text from blocking mouse events */
+  pointer-events: none;
 }
 
 body, html {
