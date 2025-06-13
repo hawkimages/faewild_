@@ -43,12 +43,10 @@ filter {
 /* Each repeated text element */
 .carousel-text {
   position: absolute;
-  top: 50%;
-  left: 50%;
   transform-style: preserve-3d;
   font-family: 'Arial Black', sans-serif;
-  font-size: 5rem;
-  color: transparent;
+  font-size: 50rem;
+  color: black;
   text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
   white-space: nowrap;
   user-select: none;
@@ -64,7 +62,6 @@ body, html {
     justify-content: center;
     align-items: center;
     flex-direction: column;
-    z-index: 0;
 
 }
 
