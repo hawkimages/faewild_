@@ -118,7 +118,7 @@ setInterval(updateColorTemperature, 5 * 60 * 1000);
 
 const carousel = document.getElementById('carousel');
 const texts = ['F', 'A', 'E', 'W', 'I', 'L', 'D']; // Example: one letter per "spoke"
-const radius = 250; // Distance from center for 3D effect
+const radius = 120; // Distance from center for 3D effect
 const itemCount = texts.length;
 
 // Create and position text elements around the Y axis, facing outward
@@ -132,7 +132,7 @@ texts.forEach((text, i) => {
   carousel.appendChild(el);
 });
 
-// --- Carousel Rotation Logic (Y axis, outward-facing, natural mouse drag + hover pause) ---
+// --- Carousel Rotation Logic (Y axis, outward-facing, natural mouse drag + hover direction) ---
 
 const carouselContainer = document.querySelector('.carousel-container');
 
@@ -144,6 +144,10 @@ let lastMouseX = 0;
 let lastTimestamp = 0;
 const autoSpinSpeed = 0.18; // degrees per frame (~60fps)
 const friction = 0.93;
+
+// Direction logic
+let spinDirection = 1; // Updated while hovering: 1 for right, -1 for left
+let resumeSpinDirection = 1; // Used for auto-spin when not hovered
 
 // Mouse/touch drag events
 carouselContainer.addEventListener('mousedown', (e) => {
@@ -194,18 +198,26 @@ window.addEventListener('touchend', () => {
   isDragging = false;
 });
 
-// Pause auto-spin on hover
+// Track which side of the container is hovered (update spinDirection)
+carouselContainer.addEventListener('mousemove', (e) => {
+  const rect = carouselContainer.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  spinDirection = (x < rect.width / 2) ? -1 : 1; // Left: -1, Right: 1
+});
+
+// Pause auto-spin on hover, and record spin direction on leave
 carouselContainer.addEventListener('mouseenter', () => {
   isHovered = true;
 });
 carouselContainer.addEventListener('mouseleave', () => {
   isHovered = false;
+  resumeSpinDirection = spinDirection; // Set new direction for auto-spin
 });
 
 // Animation loop for rotating carousel around Y axis
 function animate() {
   if (!isDragging && !isHovered) {
-    rotationY += autoSpinSpeed;
+    rotationY += autoSpinSpeed * resumeSpinDirection;
   } else if (!isDragging && Math.abs(velocityY) > 0.01) {
     rotationY += velocityY * 0.016; // frame time
     velocityY *= friction;
@@ -216,7 +228,6 @@ function animate() {
   carousel.style.transform = `translate(-50%, -50%) rotateY(${rotationY}deg)`;
 
   // Update each text element's transform to maintain outward-facing
-  // (recalculate as the parent rotates)
   const elements = carousel.querySelectorAll('.carousel-text');
   elements.forEach((el, i) => {
     const angle = (360 / itemCount) * i;
