@@ -118,7 +118,7 @@ setInterval(updateColorTemperature, 5 * 60 * 1000);
 
 const carousel = document.getElementById('carousel');
 const texts = ['F', 'A', 'E', 'W', 'I', 'L', 'D']; // Example text
-const radius = 250; // Distance from center for 3D effect
+const radius = 120; // Distance from center for 3D effect
 const itemCount = texts.length;
 
 // Create and position text elements around the Y axis, facing outward
