@@ -25,6 +25,11 @@
     <desc id="description">Digitized portrait of a masculine african-american with platinum-blonde hair, golden makeup, and a relaxed expression. Hundreds of gradients and polygons form the contours of their right hand, wrist, and face. They grip a white flower with two fingers; the central focus of the piece. White petals are used to enhance the radiant makeup, crafted by Leigh Fleming (MUA). Over 24 hours, the background changes colors in accordance to the sky, showcasing the hundreds of dazzling pigments that make up dark skin.
     </desc>
       <defs>
+        <mask id="textmask">
+        <!--white = hidden, black = visible-->
+        <rect x="0" y="0" width="4104" height="7296" fill="white"/>
+        <use xlink:href="#mask" fill="black"/>
+        </mask>
       <filter id="colorTempFilter" color-interpolation-filters="sRGB">
         <feColorMatrix id="colorTempMatrix" type="matrix" values=
          "1 0 0 0 0
@@ -1560,10 +1565,15 @@
         <path d="M61.901,7296C61.901,7296 63.402,7233.36 0,7285.76" style="fill:none;"/>
         <path d="M134.119,7075.9C134.119,7075.9 175.76,7052.76 167.543,7103.42L179.673,7122.28L170.808,7138.98C170.808,7138.98 152.489,7114.3 145.549,7130.68C138.609,7147.06 129.568,7148.26 129.568,7148.26" style="fill:none;"/>
     </g>
-    </svg>
+        <!--Carousel masked by SVG "mask" using foreignObject-->
+    <foreignObject x="0" y="0" width="4104" height="7296" style="pointer-events: none;">
+      <div xmlns="http://www.w3.org/1999/xhtml" id="carousel-mask-layer" style="width:100%;height:100%;mask:url(#textmask);-webkit-mask:url(#textmask);pointer-events:none;position:absolute;">
     <div class="carousel-container" aria-label="Rotating text carousel" role="region">
       <div class="carousel" id="carousel"></div>
     </div>
+ </div>
+</foreignObject>
+    </svg>
 <script src="faescript.js"></script>
   </body>
 </html>

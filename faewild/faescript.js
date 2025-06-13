@@ -118,7 +118,7 @@ setInterval(updateColorTemperature, 5 * 60 * 1000);
 
 const carousel = document.getElementById('carousel');
 const texts = ['F', 'A', 'E', 'W', 'I', 'L', 'D']; // Example text
-const radius = 120;
+const radius = 250;
 const itemCount = texts.length;
 
 // Create and position text elements
@@ -141,14 +141,14 @@ let lastTimestamp = 0;
 
 // --- Real-time velocity based on mouse position ---
 let hoverVelocity = 0;
-const maxVelocity = 2.5;   // Maximum velocity (deg/frame) when hovering
+const maxVelocity = 0.5;   // Maximum velocity (deg/frame) when hovering
 const minVelocity = 0.18;  // Default auto-spin velocity (deg/frame)
 let useHoverVelocity = false;
 let resumeSpinDirection = 1; // 1 is right, -1 is left
 
 // --- Grace period after dragging ---
 let graceTimeout = null;
-const gracePeriod = 400; // ms, adjust as needed
+const gracePeriod = 1000; // ms, adjust as needed
 
 // Mouse drag events
 carouselContainer.addEventListener('mousedown', (e) => {
