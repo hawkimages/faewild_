@@ -118,7 +118,7 @@ setInterval(updateColorTemperature, 5 * 60 * 1000);
 
 const carousel = document.getElementById('carousel');
 const texts = ['F', 'A', 'E', 'W', 'I', 'L', 'D']; // Example text
-const radius = 250; // Distance from center for 3D effect
+const radius = 120; // Distance from center for 3D effect
 const itemCount = texts.length;
 
 // Create and position text elements around the Y axis, facing outward
@@ -132,8 +132,6 @@ texts.forEach((text, i) => {
   carousel.appendChild(el);
 });
 
-// --- Carousel Rotation Logic (Y axis, outward-facing, natural mouse drag + hover direction) ---
-
 const carouselContainer = document.querySelector('.carousel-container');
 
 let rotationY = 0;
@@ -141,19 +139,21 @@ let velocityY = 0;
 let isDragging = false;
 let lastMouseX = 0;
 let lastTimestamp = 0;
-const autoSpinSpeed = 0.18; // degrees per frame (~60fps)
-const friction = 0.93;
 
-// Direction logic
-let spinDirection = 1; // Updated while hovering: 1 for right, -1 for left
-let resumeSpinDirection = 1; // Used for auto-spin when not dragging
+// --- Real-time velocity based on mouse position ---
+let hoverVelocity = 0;         // Set by mouse position
+const maxVelocity = 2.5;       // Maximum velocity (deg/frame) for hover
+const minVelocity = 0.18;      // Default auto-spin velocity (deg/frame)
+let useHoverVelocity = false;  // Whether to use hover velocity
+let resumeSpinDirection = 1;   // 1 is right, -1 is left
 
-// Mouse/touch drag events
+// Drag events
 carouselContainer.addEventListener('mousedown', (e) => {
   isDragging = true;
   lastMouseX = e.clientX;
   velocityY = 0;
   lastTimestamp = performance.now();
+  useHoverVelocity = false;
   e.preventDefault();
 });
 
@@ -162,7 +162,6 @@ window.addEventListener('mousemove', (e) => {
   const dx = e.clientX - lastMouseX;
   rotationY += dx;
   lastMouseX = e.clientX;
-
   // Calculate velocity for inertia
   const now = performance.now();
   const dt = (now - lastTimestamp) / 1000;
@@ -180,13 +179,13 @@ carouselContainer.addEventListener('touchstart', (e) => {
   lastMouseX = e.touches[0].clientX;
   velocityY = 0;
   lastTimestamp = performance.now();
+  useHoverVelocity = false;
 });
 window.addEventListener('touchmove', (e) => {
   if (!isDragging) return;
   const dx = e.touches[0].clientX - lastMouseX;
   rotationY += dx;
   lastMouseX = e.touches[0].clientX;
-
   // Velocity for inertia
   const now = performance.now();
   const dt = (now - lastTimestamp) / 1000;
@@ -197,26 +196,37 @@ window.addEventListener('touchend', () => {
   isDragging = false;
 });
 
-// Track which side of the container is hovered (update spinDirection)
+// Real-time velocity and direction on mousemove (while not dragging)
 carouselContainer.addEventListener('mousemove', (e) => {
+  if (isDragging) return;
   const rect = carouselContainer.getBoundingClientRect();
   const x = e.clientX - rect.left;
-  spinDirection = (x < rect.width / 2) ? -1 : 1; // Left: -1, Right: 1
+  const center = rect.width / 2;
+  // Range from -1 (left) to +1 (right)
+  const rel = (x - center) / center;
+  hoverVelocity = rel * maxVelocity;
+  useHoverVelocity = true;
+  // Remember direction for default spin
+  resumeSpinDirection = (rel < 0) ? -1 : 1;
 });
 
-// On mouse leave, record spin direction for auto-spin
 carouselContainer.addEventListener('mouseleave', () => {
-  resumeSpinDirection = spinDirection; // Set new direction for auto-spin
+  useHoverVelocity = false;
 });
 
 // Animation loop for rotating carousel around Y axis
 function animate() {
-  if (!isDragging) {
-    rotationY += autoSpinSpeed * resumeSpinDirection;
-  } else if (Math.abs(velocityY) > 0.01) {
-    rotationY += velocityY * 0.016; // frame time
-    velocityY *= friction;
-    if (Math.abs(velocityY) < 0.01) velocityY = 0;
+  if (isDragging) {
+    // Drag logic: handled in event listeners, inertia on release
+    if (Math.abs(velocityY) > 0.01) {
+      rotationY += velocityY * 0.016; // frame time
+      velocityY *= 0.93;
+      if (Math.abs(velocityY) < 0.01) velocityY = 0;
+    }
+  } else if (useHoverVelocity) {
+    rotationY += hoverVelocity;
+  } else {
+    rotationY += minVelocity * resumeSpinDirection;
   }
 
   // Update carousel rotation
