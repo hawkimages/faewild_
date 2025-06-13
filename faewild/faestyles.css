@@ -29,17 +29,15 @@ filter {
   perspective: 1000px;
   overflow: visible;
   /* Optional: add border to visualize container */
-  border: 10px solid #FFFFFF;
+  border: 0px solid #FFFFFF; /* debug border */
 }
 
 /* The rotating carousel wrapper */
 #carousel {
   position: absolute;
-  top: 50%;
   left: 50%;
-  overflow: visible;
+  top:30%;
   transform-style: preserve-3d;
-  transition: transform 0.5s linear;
 }
 
 /* Each repeated text element */
@@ -48,11 +46,8 @@ filter {
   top: 50%;
   left: 50%;
   transform-style: preserve-3d;
-  transform-origin: 0 0 100px; /* Radius of circular path */
   font-family: 'Arial Black', sans-serif;
   font-size: 5rem;
-  stroke: rgb(241, 240, 238);
-  stroke-width: 10px;
   color: transparent;
   text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
   white-space: nowrap;
