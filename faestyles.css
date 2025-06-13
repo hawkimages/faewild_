@@ -45,7 +45,7 @@ filter {
   position: absolute;
   transform-style: preserve-3d;
   font-family: 'Arial Black', sans-serif;
-  font-size: 50rem;
+  font-size: 5rem;
   color: black;
   text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
   white-space: nowrap;
@@ -67,7 +67,17 @@ body, html {
 
 /* Masking the carousel container with silhouette mask */
 .carousel-container.masked {
-  mask: url(#mask);
-  -webkit-mask: url(#mask);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: auto;
+  /*Mask from SVG shape*/
+  mask-type: alpha;
+  -webkit-mask-image: url(#mask);  
+  mask-image: url(#mask);
+  border: 10px solid red
 }
 
+/* Why doesn't this work anymore? */
