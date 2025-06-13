@@ -114,61 +114,95 @@ function updateColorTemperature() {
 updateColorTemperature();
 setInterval(updateColorTemperature, 5 * 60 * 1000);
 
-// --- 3D Horizontal (Wheel) Text Carousel Setup ---
+// --- 3D Y-Axis (Wheel) Text Carousel Setup ---
 
 const carousel = document.getElementById('carousel');
-const texts = ['FEYWILD']; // You can add more words/letters here
+const texts = ['FEYWILD']; // Add more words/letters if desired
 const radius = 100; // Distance from center for 3D effect
 const itemCount = texts.length;
 
-// Create and position text elements around a horizontal circle (like a wheel)
+// Create and position text elements around the Y axis (like a wheel on its side)
 texts.forEach((text, i) => {
   const el = document.createElement('div');
   el.className = 'carousel-text';
   el.textContent = text;
   const angle = (360 / itemCount) * i;
-  el.style.transform = `rotateX(${angle}deg) translateZ(${radius}px)`;
+  el.style.transform = `rotateY(${angle}deg) translateZ(${radius}px)`;
   carousel.appendChild(el);
 });
 
-// --- Carousel Rotation Logic (Horizontal) ---
+// --- Carousel Rotation Logic (Y axis, natural mouse drag) ---
 
 const carouselContainer = document.querySelector('.carousel-container');
-let rotationX = 0;
-let rotationSpeed = 0.2; // Default slow rotation speed (degrees per frame)
 
-// Update rotation speed based on mouse Y relative to container center
-carouselContainer.addEventListener('mousemove', (e) => {
-  const rect = carouselContainer.getBoundingClientRect();
-  const centerY = rect.top + rect.height / 2;
-  const deltaY = e.clientY - centerY;
+let rotationY = 0;
+let rotationSpeed = 0;
+let isDragging = false;
+let lastMouseX = 0;
+let velocityY = 0;
+let lastTimestamp = 0;
+const friction = 0.95; // Inertia/friction factor
 
-  // Normalize deltaY to [-1, 1]
-  const maxDistance = rect.height / 2;
-  let normalized = deltaY / maxDistance;
-  normalized = Math.max(-1, Math.min(1, normalized));
-
-  const deadZone = 0.1; // Small range near center for slow spin
-
-  if (Math.abs(normalized) < deadZone) {
-    // Slow spin, preserve current direction
-    rotationSpeed = 0.2 * Math.sign(rotationSpeed || 1);
-  } else {
-    // Speed proportional to distance from center, max 1.5 deg/frame
-    rotationSpeed = normalized * 1.5;
-  }
+// Mouse down to start dragging
+carouselContainer.addEventListener('mousedown', (e) => {
+  isDragging = true;
+  lastMouseX = e.clientX;
+  velocityY = 0;
+  lastTimestamp = performance.now();
+  e.preventDefault();
 });
 
-// Reset to slow spin when mouse leaves container
-carouselContainer.addEventListener('mouseleave', () => {
-  rotationSpeed = 0.2 * Math.sign(rotationSpeed || 1);
+// Mouse move to rotate
+window.addEventListener('mousemove', (e) => {
+  if (!isDragging) return;
+  const dx = e.clientX - lastMouseX;
+  rotationY += dx * 0.5; // Sensitivity
+  lastMouseX = e.clientX;
+
+  // Calculate velocity for inertia
+  const now = performance.now();
+  const dt = (now - lastTimestamp) / 1000;
+  velocityY = dx / (dt ? dt : 1); // px/sec
+  lastTimestamp = now;
 });
 
-// Animation loop for rotating carousel horizontally
+// Mouse up to stop dragging, inertia continues
+window.addEventListener('mouseup', () => {
+  isDragging = false;
+});
+
+// Touch support (mobile)
+carouselContainer.addEventListener('touchstart', (e) => {
+  isDragging = true;
+  lastMouseX = e.touches[0].clientX;
+  velocityY = 0;
+  lastTimestamp = performance.now();
+});
+window.addEventListener('touchmove', (e) => {
+  if (!isDragging) return;
+  const dx = e.touches[0].clientX - lastMouseX;
+  rotationY += dx * 0.5;
+  lastMouseX = e.touches[0].clientX;
+
+  // Velocity for inertia
+  const now = performance.now();
+  const dt = (now - lastTimestamp) / 1000;
+  velocityY = dx / (dt ? dt : 1);
+  lastTimestamp = now;
+});
+window.addEventListener('touchend', () => {
+  isDragging = false;
+});
+
+// Animation loop for rotating carousel around Y axis
 function animate() {
-  rotationX += rotationSpeed;
-  carousel.style.transform = `translate(-50%, -50%) rotateX(${rotationX}deg)`;
+  if (!isDragging) {
+    // Apply friction/inertia when not dragging
+    rotationY += velocityY * 0.016; // 60 fps frame time
+    velocityY *= friction;
+    if (Math.abs(velocityY) < 0.01) velocityY = 0;
+  }
+  carousel.style.transform = `translate(-50%, -50%) rotateY(${rotationY}deg)`;
   requestAnimationFrame(animate);
 }
-
 animate();
