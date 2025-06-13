@@ -117,7 +117,7 @@ setInterval(updateColorTemperature, 5 * 60 * 1000);
 // --- 3D Y-Axis (Wheel) Text Carousel Setup ---
 
 const carousel = document.getElementById('carousel');
-const texts = ['F', 'A', 'E', 'W', 'I', 'L', 'D']; // Example: one letter per "spoke"
+const texts = ['F', 'A', 'E', 'W', 'I', 'L', 'D']; // Example text
 const radius = 120; // Distance from center for 3D effect
 const itemCount = texts.length;
 
@@ -139,7 +139,6 @@ const carouselContainer = document.querySelector('.carousel-container');
 let rotationY = 0;
 let velocityY = 0;
 let isDragging = false;
-let isHovered = false;
 let lastMouseX = 0;
 let lastTimestamp = 0;
 const autoSpinSpeed = 0.18; // degrees per frame (~60fps)
@@ -147,7 +146,7 @@ const friction = 0.93;
 
 // Direction logic
 let spinDirection = 1; // Updated while hovering: 1 for right, -1 for left
-let resumeSpinDirection = 1; // Used for auto-spin when not hovered
+let resumeSpinDirection = 1; // Used for auto-spin when not dragging
 
 // Mouse/touch drag events
 carouselContainer.addEventListener('mousedown', (e) => {
@@ -205,20 +204,16 @@ carouselContainer.addEventListener('mousemove', (e) => {
   spinDirection = (x < rect.width / 2) ? -1 : 1; // Left: -1, Right: 1
 });
 
-// Pause auto-spin on hover, and record spin direction on leave
-carouselContainer.addEventListener('mouseenter', () => {
-  isHovered = true;
-});
+// On mouse leave, record spin direction for auto-spin
 carouselContainer.addEventListener('mouseleave', () => {
-  isHovered = false;
   resumeSpinDirection = spinDirection; // Set new direction for auto-spin
 });
 
 // Animation loop for rotating carousel around Y axis
 function animate() {
-  if (!isDragging && !isHovered) {
+  if (!isDragging) {
     rotationY += autoSpinSpeed * resumeSpinDirection;
-  } else if (!isDragging && Math.abs(velocityY) > 0.01) {
+  } else if (Math.abs(velocityY) > 0.01) {
     rotationY += velocityY * 0.016; // frame time
     velocityY *= friction;
     if (Math.abs(velocityY) < 0.01) velocityY = 0;
