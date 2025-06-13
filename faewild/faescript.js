@@ -114,65 +114,6 @@ function updateColorTemperature() {
 updateColorTemperature();
 setInterval(updateColorTemperature, 5 * 60 * 1000);
 
-// --- 3D Text Carousel Setup ---
-
-const carousel = document.getElementById('carousel');
-const texts = ['FEYWILD'];
-const radius = 100; // Distance from center for 3D effect
-const itemCount = texts.length;
-
-// Create and position text elements around circle
-texts.forEach((text, i) => {
-  const el = document.createElement('div');
-  el.className = 'carousel-text';
-  el.textContent = text;  // FIXED: was 'el.textContent - text;' (typo)
-  const angle = (360 / itemCount) * i;
-  el.style.transform = `rotateY(${angle}deg) translateZ(${radius}px)`;
-  carousel.appendChild(el);
-});
-
-// --- Carousel Rotation Logic ---
-
-const carouselContainer = document.querySelector('.carousel-container');
-let rotationY = 0;
-let rotationSpeed = 0.2; // Default slow rotation speed (degrees per frame)
-
-// Update rotation speed based on mouse X relative to container center
-carouselContainer.addEventListener('mousemove', (e) => {
-  const rect = carouselContainer.getBoundingClientRect();
-  const centerX = rect.left + rect.width / 2;
-  const deltaX = e.clientX - centerX;
-
-  // Normalize deltaX to [-1, 1]
-  const maxDistance = rect.width / 2;
-  let normalized = deltaX / maxDistance;
-  normalized = Math.max(-1, Math.min(1, normalized));
-
-  const deadZone = 0.1; // Small range near center for slow spin
-
-  if (Math.abs(normalized) < deadZone) {
-    // Slow spin, preserve current direction
-    rotationSpeed = 0.2 * Math.sign(rotationSpeed || 1);
-  } else {
-    // Speed proportional to distance from center, max 1.5 deg/frame
-    rotationSpeed = normalized * 1.5;
-  }
-});
-
-// Reset to slow spin when mouse leaves container
-carouselContainer.addEventListener('mouseleave', () => {
-  rotationSpeed = 0.2 * Math.sign(rotationSpeed || 1);
-});
-
-// Animation loop for rotating carousel
-function animate() {
-  rotationY += rotationSpeed;
-  carousel.style.transform = `translate(-50%, -50%) rotateY(${rotationY}deg)`;
-  requestAnimationFrame(animate);
-}
-
-animate();
-
 // --- 3D Horizontal (Wheel) Text Carousel Setup ---
 
 const carousel = document.getElementById('carousel');
