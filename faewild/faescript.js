@@ -117,33 +117,35 @@ setInterval(updateColorTemperature, 5 * 60 * 1000);
 // --- 3D Y-Axis (Wheel) Text Carousel Setup ---
 
 const carousel = document.getElementById('carousel');
-const texts = ['FEYWILD']; // Add more words/letters if desired
-const radius = 100; // Distance from center for 3D effect
+const texts = ['F', 'A', 'E', 'W', 'I', 'L', 'D']; // Example: one letter per "spoke"
+const radius = 120; // Distance from center for 3D effect
 const itemCount = texts.length;
 
-// Create and position text elements around the Y axis (like a wheel on its side)
+// Create and position text elements around the Y axis, facing outward
 texts.forEach((text, i) => {
   const el = document.createElement('div');
   el.className = 'carousel-text';
   el.textContent = text;
   const angle = (360 / itemCount) * i;
-  el.style.transform = `rotateY(${angle}deg) translateZ(${radius}px)`;
+  // Outward-facing: rotateY(angle), push out, then rotateY(-angle)
+  el.style.transform = `rotateY(${angle}deg) translateZ(${radius}px) rotateY(${-angle}deg)`;
   carousel.appendChild(el);
 });
 
-// --- Carousel Rotation Logic (Y axis, natural mouse drag) ---
+// --- Carousel Rotation Logic (Y axis, outward-facing, natural mouse drag + hover pause) ---
 
 const carouselContainer = document.querySelector('.carousel-container');
 
 let rotationY = 0;
-let rotationSpeed = 0;
-let isDragging = false;
-let lastMouseX = 0;
 let velocityY = 0;
+let isDragging = false;
+let isHovered = false;
+let lastMouseX = 0;
 let lastTimestamp = 0;
-const friction = 0.95; // Inertia/friction factor
+const autoSpinSpeed = 0.18; // degrees per frame (~60fps)
+const friction = 0.93;
 
-// Mouse down to start dragging
+// Mouse/touch drag events
 carouselContainer.addEventListener('mousedown', (e) => {
   isDragging = true;
   lastMouseX = e.clientX;
@@ -152,26 +154,24 @@ carouselContainer.addEventListener('mousedown', (e) => {
   e.preventDefault();
 });
 
-// Mouse move to rotate
 window.addEventListener('mousemove', (e) => {
   if (!isDragging) return;
   const dx = e.clientX - lastMouseX;
-  rotationY += dx * 0.5; // Sensitivity
+  rotationY += dx;
   lastMouseX = e.clientX;
 
   // Calculate velocity for inertia
   const now = performance.now();
   const dt = (now - lastTimestamp) / 1000;
-  velocityY = dx / (dt ? dt : 1); // px/sec
+  velocityY = dx / (dt ? dt : 1);
   lastTimestamp = now;
 });
 
-// Mouse up to stop dragging, inertia continues
 window.addEventListener('mouseup', () => {
   isDragging = false;
 });
 
-// Touch support (mobile)
+// Touch support
 carouselContainer.addEventListener('touchstart', (e) => {
   isDragging = true;
   lastMouseX = e.touches[0].clientX;
@@ -181,7 +181,7 @@ carouselContainer.addEventListener('touchstart', (e) => {
 window.addEventListener('touchmove', (e) => {
   if (!isDragging) return;
   const dx = e.touches[0].clientX - lastMouseX;
-  rotationY += dx * 0.5;
+  rotationY += dx;
   lastMouseX = e.touches[0].clientX;
 
   // Velocity for inertia
@@ -194,15 +194,35 @@ window.addEventListener('touchend', () => {
   isDragging = false;
 });
 
+// Pause auto-spin on hover
+carouselContainer.addEventListener('mouseenter', () => {
+  isHovered = true;
+});
+carouselContainer.addEventListener('mouseleave', () => {
+  isHovered = false;
+});
+
 // Animation loop for rotating carousel around Y axis
 function animate() {
-  if (!isDragging) {
-    // Apply friction/inertia when not dragging
-    rotationY += velocityY * 0.016; // 60 fps frame time
+  if (!isDragging && !isHovered) {
+    rotationY += autoSpinSpeed;
+  } else if (!isDragging && Math.abs(velocityY) > 0.01) {
+    rotationY += velocityY * 0.016; // frame time
     velocityY *= friction;
     if (Math.abs(velocityY) < 0.01) velocityY = 0;
   }
+
+  // Update carousel rotation
   carousel.style.transform = `translate(-50%, -50%) rotateY(${rotationY}deg)`;
+
+  // Update each text element's transform to maintain outward-facing
+  // (recalculate as the parent rotates)
+  const elements = carousel.querySelectorAll('.carousel-text');
+  elements.forEach((el, i) => {
+    const angle = (360 / itemCount) * i;
+    el.style.transform = `rotateY(${angle}deg) translateZ(${radius}px) rotateY(${-angle - rotationY}deg)`;
+  });
+
   requestAnimationFrame(animate);
 }
 animate();
