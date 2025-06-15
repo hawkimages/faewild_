@@ -236,6 +236,7 @@ function animate() {
   const elements = carousel.querySelectorAll('.carousel-text');
   elements.forEach((el, i) => {
     const angle = (360 / itemCount) * i;
+    // Maintain outward-facing by adjusting angle
     el.style.transform = `rotateY(${angle}deg) translateZ(${radius}px) rotateY(${-angle - rotationY}deg)`;
   });
 
