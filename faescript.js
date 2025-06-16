@@ -118,7 +118,7 @@ setInterval(updateColorTemperature, 5 * 60 * 1000);
 
 const carousel = document.getElementById('carousel');
 const texts = ['F', 'A', 'E', 'W', 'I', 'L', 'D']; // Example text
-const radius = 250; // Distance from center for 3D effect
+const radius = 175; // Distance from center for 3D effect
 const itemCount = texts.length;
 
 // Create and position text elements around the Y axis, facing outward
@@ -171,6 +171,14 @@ window.addEventListener('mousemove', (e) => {
 
 window.addEventListener('mouseup', () => {
   isDragging = false;
+});
+
+//Hide mouse cursor when dragging
+carouselContainer.addEventListener('mousedown', () => {
+  carouselContainer.style.cursor = 'none';
+});
+carouselContainer.addEventListener('mouseup', () => {
+  carouselContainer.style.cursor = 'default';
 });
 
 // Touch support
@@ -239,8 +247,15 @@ function animate() {
     el.style.transform = `rotateY(${angle}deg) translateZ(${radius}px) rotateY(${-angle - rotationY}deg)`;
   });
 
+  // Fade each text element based on its angle //
+  elements.forEach((el, i) => {
+    const angle = (360 / itemCount) * i + rotationY;
+    const normalizedAngle = (angle % 360 + 360) % 360; // Normalize to [0, 360)
+    const opacity = Math.max(0, Math.cos(normalizedAngle * Math.PI / 180)); // Cosine fade
+    el.style.opacity = opacity.toFixed(2);
+  });
+
   requestAnimationFrame(animate);
 }
 animate();
 
-// 
