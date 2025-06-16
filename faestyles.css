@@ -34,12 +34,12 @@ body, html {
 }
 
 /* Containers for infinite text scroll */
-#infinite-scroll-bar1, #infinite-scroll-bar2 {
-    position: static;
-    z-index: 3;
+#infinite-scroll-bar1 {
+    position: fixed;
+    z-index: 1;
     width: 100dvw;
     height: 200px;
-    overflow: hidden;
+    overflow: visible;
     display: grid;
     justify-content: center;
     align-items: center;
@@ -48,19 +48,52 @@ body, html {
 }
 
 #infinite-scroll-bar2 {
+    position: fixed;
+    z-index: -1;
+    width: 100dvw;
+    height: 100px;
+    overflow: visible;
+    display: grid;
+    justify-content: center;
+    align-items: center;
+    transform: scaleX(-1);
     /*debug border */
     border: 25px solid blue;
 }
 
+#infinite-scroll-bar1 {
+    font-size: 24rem;
+
+}
+
+#infinite-scroll-bar2 {
+    font-size: 14rem;
+}
+
 /* Text elements for infinite scroll */
-#infinite-scroll-text1, #infinite-scroll-text2 {
+#infinite-scroll-text1 {
     position: absolute;
     white-space: nowrap;
-    font-size: 24rem;
-    color: #000;
-    animation: scroll-text 10s linear infinite;
+    color: #fff;
+    animation: scroll-text-ccw 10s linear infinite;
 }
-@keyframes scroll-text {
+
+#infinite-scroll-text2 {
+    position: absolute;
+    white-space: nowrap;
+    color: #fff;
+    animation: scroll-text-cw 10s linear infinite;
+}
+@keyframes scroll-text-cw {
+    0% {
+        transform: translateX(100%);
+    }
+    100% {
+        transform: translateX(-100%);
+    }
+}
+/* reverse animation for the second text */
+@keyframes scroll-text-ccw {
     0% {
         transform: translateX(100%);
     }
