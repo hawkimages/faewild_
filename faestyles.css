@@ -5,7 +5,7 @@
         stroke-miterlimit:2;
 
 }
-
+/* Optimize SVG rendering for super-zoom functionality */
 svg.faewild {
     position: absolute;
     top: 0;
@@ -13,6 +13,13 @@ svg.faewild {
     width: auto;
     height: auto;
     z-index: -1;
+    /* Ensure SVG scales with the viewport */
+    min-width: 100%;
+    min-height: 100%;
+    max-width: none;
+    max-height: none;
+    /* Prevent SVG from being clipped */
+    overflow: visible;
 }
 
 filter {
