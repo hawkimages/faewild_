@@ -46,11 +46,6 @@ filter {
   height: clamp(100px,10rem,20dvh); /* Adjust size as needed */
   position: absolute;
   z-index: -5;
-  mask: url('#base-mask'); /* Use the mask for the moon shape */
-}
-
-#base-mask {
-  z-index: -10;
 }
 
 /* Container for the rotating text carousel */
