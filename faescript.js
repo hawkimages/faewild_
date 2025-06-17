@@ -13,6 +13,16 @@ const skyColors = [
   { time: 24, color: '#0b1d51' }    // Midnight again for looping
 ];
 
+// Rotate moon-container every 30 days to simulate lunar phases //
+const moonContainer = document.querySelector('.moon-container');
+if (moonContainer) {
+  const now = new Date();
+  // Calculate days since a known new moon date (e.g., June 26, 2025)
+  // Adjust this date as needed for your lunar cycle reference
+  const daysSinceNewMoon = Math.floor((now - new Date(2025, 5, 26)) / (1000 * 60 * 60 * 24));
+  moonContainer.style.transform = `rotate(${(daysSinceNewMoon / 29.5) * 360}deg)`;
+}
+
 // Get interpolated sky color based on fractional hour
 function getSkyColor(hour) {
   for (let i = 0; i < skyColors.length - 1; i++) {
@@ -118,7 +128,7 @@ setInterval(updateColorTemperature, 5 * 60 * 1000);
 
 const carousel = document.getElementById('carousel');
 const texts = ['F', 'A', 'E', 'W', 'I', 'L', 'D']; // Example text
-const radius = 175; // Distance from center for 3D effect
+const radius = 205; // Distance from center for 3D effect
 const itemCount = texts.length;
 
 // Create and position text elements around the Y axis, facing outward
