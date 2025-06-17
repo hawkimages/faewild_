@@ -42,8 +42,8 @@ filter {
 
 .moon {
   /* shrink the moon */
-  width: 100px; /* Adjust size as needed */
-  height: 100px; /* Adjust size as needed */
+  width: clamp(100px,10rem,20dvw); /* Adjust size as needed */
+  height: clamp(100px,10rem,20dvh); /* Adjust size as needed */
   position: absolute;
   z-index: -10;
 }
