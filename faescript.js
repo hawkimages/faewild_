@@ -232,6 +232,27 @@ carouselContainer.addEventListener('mouseleave', () => {
   useHoverVelocity = false;
 });
 
+// When dragging, update skyColors based on mouse position. After 3s fade back slowly to current skyColor //
+let skyColorTimeout;
+carouselContainer.addEventListener('mousemove', (e) => {
+  if (isDragging) {
+    const rect = carouselContainer.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const center = rect.width / 2;
+    const rel = (x - center) / center; // Range from -1 to +1
+    const hour = 12 + rel * 12; // Map to [0, 24] hours
+    const color = getSkyColor(hour);
+    document.querySelector('.faewild .background').style.fill = color;
+
+    // Reset timeout to fade back to current color
+    clearTimeout(skyColorTimeout);
+    skyColorTimeout = setTimeout(() => {
+      updateBackgroundColor();
+    }, 5000); // Fade back after 3 seconds
+  }
+});
+
+
 // Animation loop for rotating carousel around Y axis
 function animate() {
   if (isDragging) {
@@ -264,6 +285,7 @@ function animate() {
     const opacity = Math.max(0, Math.cos(normalizedAngle * Math.PI / 180)); // Cosine fade
     el.style.opacity = opacity.toFixed(2);
   });
+
 
   requestAnimationFrame(animate);
 }
