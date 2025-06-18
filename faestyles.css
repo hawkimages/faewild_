@@ -109,7 +109,7 @@ div.instructions {
 div.trademark {
   display: flex;
   position: fixed;
-  justify-content: left;
+  justify-content: center;
   text-align: center;
   bottom: 2dvh;
   font-family: 'Montserrat', sans-serif;
