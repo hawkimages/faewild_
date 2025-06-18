@@ -240,7 +240,7 @@ carouselContainer.addEventListener('mousemove', (e) => {
   if (isDragging) {
     const rect = carouselContainer.getBoundingClientRect();
     const x = e.clientX - rect.left;
-    const center = rect.width / 2;
+    const center = rect.width / 1; // the "center" //
     const rel = (x - center) / center; // Range from -1 to +1
     const hour = 12 + rel * 12; // Map to [0, 24] hours
     const newColor = getSkyColor(hour);
@@ -268,7 +268,7 @@ carouselContainer.addEventListener('mousemove', (e) => {
   if (isDragging) {
     const rect = carouselContainer.getBoundingClientRect();
     const x = e.clientX - rect.left;
-    const center = rect.width / 2;
+    const center = rect.width / 1; // the "center"
     const rel = (x - center) / center; // Range from -1 to +1
     let factor;
     if (rel < 0) {
@@ -276,6 +276,7 @@ carouselContainer.addEventListener('mousemove', (e) => {
     } else {
       factor = 1 - (1 - rel) * 2; // Map to [-1, 1]
     }
+    factor = Math.max(-1, Math.min(1, factor)); // Clamp to [-1, 1]
     const matrix = getColorTempMatrix(factor);
     const colorTempMatrix = document.getElementById('colorTempMatrix');
     if (colorTempMatrix) {
