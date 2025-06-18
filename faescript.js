@@ -181,7 +181,7 @@ function animate() {
   const elements = carousel.querySelectorAll('.carousel-text');
   elements.forEach((el, i) => {
     const angle = (360 / itemCount) * i;
-    el.style.transform = `rotateY(${angle}deg) translateZ(${radius}px) rotateY(-${angle + rotationY}deg)`;
+    el.style.transform = `rotateY(${angle}deg) translateZ(${radius}px) rotateY(-${rotationY}deg)`;
     const normAngle = ((angle + rotationY) % 360 + 360) % 360;
     el.style.opacity = Math.max(0, Math.cos(normAngle * Math.PI / 180)).toFixed(2);
   });
