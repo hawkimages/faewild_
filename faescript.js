@@ -67,7 +67,8 @@ if (moonContainer) {
 // --- 3D TEXT CAROUSEL ---
 const carousel = document.getElementById('carousel'),
   texts = ['F', 'A', 'E', 'W', 'I', 'L', 'D'],
-  radius = 205,
+  // Responsive radius for all devices //
+  radius = Math.min(window.innerHeight, window.innerWidth) / 2,
   itemCount = texts.length,
   carouselContainer = document.querySelector('.carousel-container');
 let rotationY = 0, velocityY = 0, isDragging = false, lastMouseX = 0, lastTimestamp = 0;

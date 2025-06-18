@@ -52,7 +52,7 @@ filter {
 .carousel-container {
   position: absolute;
   z-index: 2;
-  width: 100vw;  /* Adjust size as needed */
+  width: 100dvw;  /* Adjust size as needed */
   height: 125vh;
   perspective: 1000px;
   overflow: visible;
@@ -69,11 +69,11 @@ filter {
 }
 
 /* Each repeated text element */
-.carousel-text {
+.carousel-text { 
   position: absolute;
   transform-style: preserve-3d;
   font-family: 'Montserrat', sans-serif;
-  font-size: clamp(4rem, 15dvw, 8rem);
+  font-size: clamp(4rem, 15dvw, 7rem);
   color: transparent;
   text-shadow: 0 0 11px rgba(255, 255, 255, 0.8);
   white-space: nowrap;
