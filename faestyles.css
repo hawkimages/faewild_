@@ -91,7 +91,7 @@ body, html {
     flex-direction: column;
 }
 
-.instructions {
+div.instructions {
   display: flex;
   position: fixed;
   justify-content: center;
@@ -106,7 +106,7 @@ body, html {
   border: 0px solid #fff; /* debug border */
 }
 
-.trademark {
+div.trademark {
   display: flex;
   position: fixed;
   justify-content: left;
