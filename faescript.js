@@ -23,6 +23,7 @@ if (moonContainer) {
   moonContainer.style.transform = `rotate(${(daysSinceNewMoon / 29.5) * 360}deg)`;
 }
 
+
 // Get interpolated sky color based on fractional hour
 function getSkyColor(hour) {
   for (let i = 0; i < skyColors.length - 1; i++) {
@@ -232,8 +233,9 @@ carouselContainer.addEventListener('mouseleave', () => {
   useHoverVelocity = false;
 });
 
-// When dragging, update skyColors based on mouse position. After 3s fade back slowly to current skyColor //
-let skyColorTimeout;
+// Update skyColors based on dragged mouse position. After 3s transition back to current skyColor and skyTemperature. //
+const skyColorTransitionDuration = 5000; // 3 seconds
+let skyColorTimeout = null;
 carouselContainer.addEventListener('mousemove', (e) => {
   if (isDragging) {
     const rect = carouselContainer.getBoundingClientRect();
@@ -241,14 +243,53 @@ carouselContainer.addEventListener('mousemove', (e) => {
     const center = rect.width / 2;
     const rel = (x - center) / center; // Range from -1 to +1
     const hour = 12 + rel * 12; // Map to [0, 24] hours
-    const color = getSkyColor(hour);
-    document.querySelector('.faewild .background').style.fill = color;
+    const newColor = getSkyColor(hour);
+    
+    // Apply new sky color immediately
+    document.querySelector('.faewild .background').style.fill = newColor;
 
-    // Reset timeout to fade back to current color
-    clearTimeout(skyColorTimeout);
+    // Clear any existing timeout
+    if (skyColorTimeout) {
+      clearTimeout(skyColorTimeout);
+    }
+
+    // Set a timeout to revert back to the current time color
     skyColorTimeout = setTimeout(() => {
       updateBackgroundColor();
-    }, 5000); // Fade back after 3 seconds
+      updateColorTemperature();
+      skyColorTimeout = null;
+    }, skyColorTransitionDuration);
+  }
+});
+// Update colorTempFilter based on dragged mouse position. After 3s reset ro current //
+const colorTempTransitionDuration = 5000; // 3 seconds
+let colorTempTimeout = null;
+carouselContainer.addEventListener('mousemove', (e) => {
+  if (isDragging) {
+    const rect = carouselContainer.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const center = rect.width / 2;
+    const rel = (x - center) / center; // Range from -1 to +1
+    let factor;
+    if (rel < 0) {
+      factor = -1 + (1 + rel) * 2; // Map to [-1, 1]
+    } else {
+      factor = 1 - (1 - rel) * 2; // Map to [-1, 1]
+    }
+    const matrix = getColorTempMatrix(factor);
+    const colorTempMatrix = document.getElementById('colorTempMatrix');
+    if (colorTempMatrix) {
+      colorTempMatrix.setAttribute('values', matrix);
+    }
+    // Clear any existing timeout
+    if (colorTempTimeout) {
+      clearTimeout(colorTempTimeout);
+    }
+    // Set a timeout to revert back to the current time color temperature
+    colorTempTimeout = setTimeout(() => {
+      updateColorTemperature();
+      colorTempTimeout = null;
+    }, colorTempTransitionDuration);
   }
 });
 
