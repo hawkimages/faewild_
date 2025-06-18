@@ -1,334 +1,189 @@
-// Define sky colors for different times (customizable)
+// --- SKY COLOR & TEMPERATURE ---
+
 const skyColors = [
-  { time: 0, color: '#0b1d51' },    // Midnight - dark blue
-  { time: 4, color: '#97B4EF' },    // Early Morning - Periwinkle
-  { time: 5, color: '#fbbf93' },    // Dawn - soft orange
-  { time: 7, color: '#FFBF53' },    // Morning - Orange
-  { time: 9, color: '#F7D6A0' },    // Late Morning - soft peach
-  { time: 11, color: '#F7E8B5' },   // Late Morning - soft yellow
-  { time: 12, color: '#B5F4F7' },   // Noon - soft cyan
-  { time: 16, color: '#3AECF2' },   // Afternoon - cyan
-  { time: 19, color: '#97B4EF' },   // Evening - Periwinkle
-  { time: 21, color: '#191970' },   // Night - midnight blue
-  { time: 24, color: '#0b1d51' }    // Midnight again for looping
+  { time: 0, color: '#0b1d51' }, { time: 4, color: '#97B4EF' }, { time: 5, color: '#fbbf93' },
+  { time: 7, color: '#FFBF53' }, { time: 9, color: '#F7D6A0' }, { time: 11, color: '#F7E8B5' },
+  { time: 12, color: '#B5F4F7' }, { time: 16, color: '#3AECF2' }, { time: 19, color: '#97B4EF' },
+  { time: 21, color: '#191970' }, { time: 24, color: '#0b1d51' }
 ];
 
-// Rotate moon-container every 30 days to simulate lunar phases //
-const moonContainer = document.querySelector('.moon-container');
-if (moonContainer) {
-  const now = new Date();
-  // Calculate days since a known new moon date (e.g., June 26, 2025)
-  // Adjust this date as needed for your lunar cycle reference
-  const daysSinceNewMoon = Math.floor((now - new Date(2025, 5, 26)) / (1000 * 60 * 60 * 24));
-  moonContainer.style.transform = `rotate(${(daysSinceNewMoon / 29.5) * 360}deg)`;
-}
-
-
-// Get interpolated sky color based on fractional hour
-function getSkyColor(hour) {
+const getSkyColor = hour => {
   for (let i = 0; i < skyColors.length - 1; i++) {
     if (hour >= skyColors[i].time && hour < skyColors[i + 1].time) {
-      const start = skyColors[i];
-      const end = skyColors[i + 1];
-      const ratio = (hour - start.time) / (end.time - start.time);
-      return interpolateColor(start.color, end.color, ratio);
+      const { color: c1, time: t1 } = skyColors[i], { color: c2, time: t2 } = skyColors[i + 1];
+      return interpolateColor(c1, c2, (hour - t1) / (t2 - t1));
     }
   }
-  return skyColors[0].color; // fallback
-}
+  return skyColors[0].color;
+};
 
-// Interpolate between two hex colors by factor [0-1]
-function interpolateColor(color1, color2, factor) {
-  const c1 = hexToRgb(color1);
-  const c2 = hexToRgb(color2);
-  const result = {
-    r: Math.round(c1.r + factor * (c2.r - c1.r)),
-    g: Math.round(c1.g + factor * (c2.g - c1.g)),
-    b: Math.round(c1.b + factor * (c2.b - c1.b))
-  };
-  return rgbToHex(result.r, result.g, result.b);
-}
-
-// Convert hex color string to RGB object
-function hexToRgb(hex) {
+const interpolateColor = (a, b, f) => {
+  const c1 = hexToRgb(a), c2 = hexToRgb(b);
+  return rgbToHex(
+    Math.round(c1.r + f * (c2.r - c1.r)),
+    Math.round(c1.g + f * (c2.g - c1.g)),
+    Math.round(c1.b + f * (c2.b - c1.b))
+  );
+};
+const hexToRgb = hex => {
   hex = hex.replace('#', '');
-  return {
-    r: parseInt(hex.substring(0, 2), 16),
-    g: parseInt(hex.substring(2, 4), 16),
-    b: parseInt(hex.substring(4, 6), 16)
-  };
-}
+  return { r: parseInt(hex.slice(0, 2), 16), g: parseInt(hex.slice(2, 4), 16), b: parseInt(hex.slice(4, 6), 16) };
+};
+const rgbToHex = (r, g, b) =>
+  '#' + [r, g, b].map(x => x.toString(16).padStart(2, '0')).join('');
 
-// Convert RGB values to hex string
-function rgbToHex(r, g, b) {
-  return '#' + [r, g, b].map(x => {
-    const hex = x.toString(16);
-    return hex.length === 1 ? '0' + hex : hex;
-  }).join('');
-}
-
-// Update the background rect fill color based on current time
+// Update SVG rect fill for background
 function updateBackgroundColor() {
-  const now = new Date();
-  const hour = now.getHours() + now.getMinutes() / 60; // fractional hour
-  const color = getSkyColor(hour);
-  const backgroundRect = document.querySelector('.faewild .background');
-  if (backgroundRect) {
-    backgroundRect.style.fill = color;
-  }
+  const now = new Date(), hour = now.getHours() + now.getMinutes() / 60;
+  const rect = document.querySelector('.faewild .background');
+  if (rect) rect.style.fill = getSkyColor(hour);
 }
-
-// Initial background color update and periodic update every 10 minutes
-updateBackgroundColor();
 setInterval(updateBackgroundColor, 10 * 60 * 1000);
+updateBackgroundColor();
 
-// Generate feColorMatrix values for warming/cooling effect
-// factor: -1 (cool) to +1 (warm), 0 is neutral
+// Color temperature filter matrix
 function getColorTempMatrix(factor) {
   factor = Math.max(-1, Math.min(1, factor));
-
-  // Adjust RGB multipliers based on factor
-  const rMult = 1 + 0.25 * factor;  // up to +30% red
-  const gMult = 1 + 0.15 * factor; // up to +15% green
-  const bMult = 1 - 0.25 * factor;  // down to -30% blue when warm
-
-  // Return flattened 5x4 matrix string for feColorMatrix
-  return `${rMult} 0 0 0 0 0 ${gMult} 0 0 0 0 0 ${bMult} 0 0 0 0 0 1 0`.replace(/\s+/g, ' ').trim();
+  const r = 1 + 0.25 * factor, g = 1 + 0.15 * factor, b = 1 - 0.25 * factor;
+  return `${r} 0 0 0 0 0 ${g} 0 0 0 0 0 ${b} 0 0 0 0 0 1 0`.replace(/\s+/g, ' ').trim();
 }
-
-// Update color temperature filter values based on current time
 function updateColorTemperature() {
-  const now = new Date();
-  const hour = now.getHours() + now.getMinutes() / 60;
+  const now = new Date(), hour = now.getHours() + now.getMinutes() / 60;
+  let factor = hour >= 6 && hour <= 15 ? 1 - Math.abs(hour - 12) / 6
+    : hour < 6 ? -1 + hour / 6 : -1 + (24 - hour) / 9;
+  const el = document.getElementById('colorTempMatrix');
+  if (el) el.setAttribute('values', getColorTempMatrix(factor));
+}
+setInterval(updateColorTemperature, 5 * 60 * 1000);
+updateColorTemperature();
 
-  let factor;
-  if (hour >= 6 && hour <= 15) {
-    // Warmest at noon (12), ramp up/down linearly
-    factor = 1 - Math.abs(hour - 12) / 6;
-  } else {
-    // Cooler at night
-    if (hour < 6) {
-      factor = -1 + hour / 6; // from -1 at 0 to 0 at 6
-    } else {
-      factor = -1 + (24 - hour) / 9; // from -1 at 24 to 0 at 15
-    }
-  }
-
-  const matrix = getColorTempMatrix(factor);
-  const colorTempMatrix = document.getElementById('colorTempMatrix');
-  if (colorTempMatrix) {
-    colorTempMatrix.setAttribute('values', matrix);
-  }
+// --- MOON ROTATION ---
+const moonContainer = document.querySelector('.moon-container');
+if (moonContainer) {
+  const days = Math.floor((Date.now() - new Date(2025, 5, 26)) / (1000 * 60 * 60 * 24));
+  moonContainer.style.transform = `rotate(${(days / 29.5) * 360}deg)`;
 }
 
-// Initial color temperature update and periodic update every 5 minutes
-updateColorTemperature();
-setInterval(updateColorTemperature, 5 * 60 * 1000);
+// --- 3D TEXT CAROUSEL ---
+const carousel = document.getElementById('carousel'),
+  texts = ['F', 'A', 'E', 'W', 'I', 'L', 'D'],
+  radius = 205,
+  itemCount = texts.length,
+  carouselContainer = document.querySelector('.carousel-container');
+let rotationY = 0, velocityY = 0, isDragging = false, lastMouseX = 0, lastTimestamp = 0;
+let hoverVelocity = 0, useHoverVelocity = false, resumeSpinDirection = 1;
+const maxVelocity = 2.5, minVelocity = 0.18;
 
-// --- 3D Y-Axis (Wheel) Text Carousel Setup ---
-
-const carousel = document.getElementById('carousel');
-const texts = ['F', 'A', 'E', 'W', 'I', 'L', 'D']; // Example text
-const radius = 205; // Distance from center for 3D effect
-const itemCount = texts.length;
-
-// Create and position text elements around the Y axis, facing outward
 texts.forEach((text, i) => {
   const el = document.createElement('div');
   el.className = 'carousel-text';
   el.textContent = text;
-  const angle = (360 / itemCount) * i;
-  // Outward-facing: rotateY(angle), push out, then rotateY(-angle)
-  el.style.transform = `rotateY(${angle}deg) translateZ(${radius}px) rotateY(${-angle}deg)`;
+  el.style.transform = `rotateY(${(360 / itemCount) * i}deg) translateZ(${radius}px) rotateY(-${(360 / itemCount) * i}deg)`;
   carousel.appendChild(el);
 });
 
-const carouselContainer = document.querySelector('.carousel-container');
+// --- Unified Pointer Utilities ---
+function getClientX(e) {
+  if (e.touches && e.touches.length) return e.touches[0].clientX;
+  if (e.changedTouches && e.changedTouches.length) return e.changedTouches[0].clientX;
+  return e.clientX;
+}
 
-let rotationY = 0;
-let velocityY = 0;
-let isDragging = false;
-let lastMouseX = 0;
-let lastTimestamp = 0;
-
-// --- Real-time velocity based on mouse position ---
-let hoverVelocity = 0;         // Set by mouse position
-const maxVelocity = 2.5;       // Maximum velocity (deg/frame) for hover
-const minVelocity = 0.18;      // Default auto-spin velocity (deg/frame)
-let useHoverVelocity = false;  // Whether to use hover velocity
-let resumeSpinDirection = 1;   // 1 is right, -1 is left
-
-// Drag events
-carouselContainer.addEventListener('mousedown', (e) => {
+// --- DRAG LOGIC (mouse + touch) ---
+function startDrag(e) {
   isDragging = true;
-  lastMouseX = e.clientX;
+  lastMouseX = getClientX(e);
   velocityY = 0;
   lastTimestamp = performance.now();
   useHoverVelocity = false;
-  e.preventDefault();
-});
-
-window.addEventListener('mousemove', (e) => {
-  if (!isDragging) return;
-  const dx = e.clientX - lastMouseX;
-  rotationY += dx;
-  lastMouseX = e.clientX;
-  // Calculate velocity for inertia
-  const now = performance.now();
-  const dt = (now - lastTimestamp) / 1000;
-  velocityY = dx / (dt ? dt : 1);
-  lastTimestamp = now;
-});
-
-window.addEventListener('mouseup', () => {
-  isDragging = false;
-});
-
-//Hide mouse cursor when dragging
-carouselContainer.addEventListener('mousedown', () => {
   carouselContainer.style.cursor = 'none';
-});
-carouselContainer.addEventListener('mouseup', () => {
-  carouselContainer.style.cursor = 'default';
-});
-
-// Touch support
-carouselContainer.addEventListener('touchstart', (e) => {
-  isDragging = true;
-  lastMouseX = e.touches[0].clientX;
-  velocityY = 0;
-  lastTimestamp = performance.now();
-  useHoverVelocity = false;
-});
-window.addEventListener('touchmove', (e) => {
+  if (e.preventDefault) e.preventDefault();
+}
+function dragMove(e) {
   if (!isDragging) return;
-  const dx = e.touches[0].clientX - lastMouseX;
+  const dx = getClientX(e) - lastMouseX;
   rotationY += dx;
-  lastMouseX = e.touches[0].clientX;
-  // Velocity for inertia
-  const now = performance.now();
-  const dt = (now - lastTimestamp) / 1000;
-  velocityY = dx / (dt ? dt : 1);
+  lastMouseX = getClientX(e);
+  const now = performance.now(), dt = (now - lastTimestamp) / 1000;
+  velocityY = dx / (dt || 1);
   lastTimestamp = now;
-});
-window.addEventListener('touchend', () => {
+  handleSkyAndTempInteraction(e, true);
+}
+function endDrag() {
   isDragging = false;
-});
+  carouselContainer.style.cursor = 'default';
+}
 
-// Real-time velocity and direction on mousemove (while not dragging)
-carouselContainer.addEventListener('mousemove', (e) => {
+// --- HOVER LOGIC (mouse + touch) ---
+function handleHover(e) {
   if (isDragging) return;
   const rect = carouselContainer.getBoundingClientRect();
-  const x = e.clientX - rect.left;
+  const x = getClientX(e) - rect.left;
   const center = rect.width / 2;
-  // Range from -1 (left) to +1 (right)
   const rel = (x - center) / center;
   hoverVelocity = rel * maxVelocity;
   useHoverVelocity = true;
-  // Remember direction for default spin
-  resumeSpinDirection = (rel < 0) ? -1 : 1;
-});
-
-carouselContainer.addEventListener('mouseleave', () => {
+  resumeSpinDirection = rel < 0 ? -1 : 1;
+}
+function endHover() {
   useHoverVelocity = false;
-});
+}
 
-// Update skyColors based on dragged mouse position. After 3s transition back to current skyColor and skyTemperature. //
-const skyColorTransitionDuration = 5000; // 3 seconds
-let skyColorTimeout = null;
-carouselContainer.addEventListener('mousemove', (e) => {
-  if (isDragging) {
-    const rect = carouselContainer.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const center = rect.width / 1; // the "center" //
-    const rel = (x - center) / center; // Range from -1 to +1
-    const hour = 12 + rel * 12; // Map to [0, 24] hours
-    const newColor = getSkyColor(hour);
-    
-    // Apply new sky color immediately
-    document.querySelector('.faewild .background').style.fill = newColor;
+// --- SKY COLOR & TEMP ON DRAG (mouse + touch) ---
+let skyColorTimeout = null, colorTempTimeout = null;
+const resetSkyTemp = () => { updateBackgroundColor(); updateColorTemperature(); };
 
-    // Clear any existing timeout
-    if (skyColorTimeout) {
-      clearTimeout(skyColorTimeout);
-    }
+function handleSkyAndTempInteraction(e, isDrag) {
+  const rect = carouselContainer.getBoundingClientRect();
+  const x = getClientX(e) - rect.left;
+  const center = rect.width / 2;
+  const rel = (x - center) / center, hour = 12 + rel * 12;
+  document.querySelector('.faewild .background').style.fill = getSkyColor(hour);
+  if (skyColorTimeout) clearTimeout(skyColorTimeout);
+  skyColorTimeout = setTimeout(resetSkyTemp, 5000);
 
-    // Set a timeout to revert back to the current time color
-    skyColorTimeout = setTimeout(() => {
-      updateBackgroundColor();
-      updateColorTemperature();
-      skyColorTimeout = null;
-    }, skyColorTransitionDuration);
-  }
-});
-// Update colorTempFilter based on dragged mouse position. After 3s reset ro current //
-const colorTempTransitionDuration = 5000; // 3 seconds
-let colorTempTimeout = null;
-carouselContainer.addEventListener('mousemove', (e) => {
-  if (isDragging) {
-    const rect = carouselContainer.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const center = rect.width / 1; // the "center"
-    const rel = (x - center) / center; // Range from -1 to +1
-    let factor;
-    if (rel < 0) {
-      factor = -1 + (1 + rel) * 2; // Map to [-1, 1]
-    } else {
-      factor = 1 - (1 - rel) * 2; // Map to [-1, 1]
-    }
-    factor = Math.max(-1, Math.min(1, factor)); // Clamp to [-1, 1]
-    const matrix = getColorTempMatrix(factor);
-    const colorTempMatrix = document.getElementById('colorTempMatrix');
-    if (colorTempMatrix) {
-      colorTempMatrix.setAttribute('values', matrix);
-    }
-    // Clear any existing timeout
-    if (colorTempTimeout) {
-      clearTimeout(colorTempTimeout);
-    }
-    // Set a timeout to revert back to the current time color temperature
-    colorTempTimeout = setTimeout(() => {
-      updateColorTemperature();
-      colorTempTimeout = null;
-    }, colorTempTransitionDuration);
-  }
-});
+  let factor = Math.max(-1, Math.min(1, rel < 0 ? -1 + (1 + rel) * 2 : 1 - (1 - rel) * 2));
+  const colorTempMatrix = document.getElementById('colorTempMatrix');
+  if (colorTempMatrix) colorTempMatrix.setAttribute('values', getColorTempMatrix(factor));
+  if (colorTempTimeout) clearTimeout(colorTempTimeout);
+  colorTempTimeout = setTimeout(updateColorTemperature, 5000);
+}
 
+// --- EVENT BINDINGS (mouse + touch) ---
 
-// Animation loop for rotating carousel around Y axis
+carouselContainer.addEventListener('mousedown', startDrag);
+carouselContainer.addEventListener('touchstart', startDrag);
+
+window.addEventListener('mousemove', dragMove);
+window.addEventListener('touchmove', dragMove, { passive: false });
+
+window.addEventListener('mouseup', endDrag);
+window.addEventListener('touchend', endDrag);
+
+carouselContainer.addEventListener('mousemove', handleHover);
+carouselContainer.addEventListener('touchmove', handleHover);
+
+carouselContainer.addEventListener('mouseleave', endHover);
+carouselContainer.addEventListener('touchcancel', endHover);
+
+// --- ANIMATION LOOP ---
 function animate() {
-  if (isDragging) {
-    // Drag logic: handled in event listeners, inertia on release
-    if (Math.abs(velocityY) > 0.01) {
-      rotationY += velocityY * 0.016; // frame time
-      velocityY *= 0.93;
-      if (Math.abs(velocityY) < 0.01) velocityY = 0;
-    }
+  if (isDragging && Math.abs(velocityY) > 0.01) {
+    rotationY += velocityY * 0.016; velocityY *= 0.93;
+    if (Math.abs(velocityY) < 0.01) velocityY = 0;
   } else if (useHoverVelocity) {
     rotationY += hoverVelocity;
   } else {
     rotationY += minVelocity * resumeSpinDirection;
   }
-
-  // Update carousel rotation
   carousel.style.transform = `translate(-50%, -50%) rotateY(${rotationY}deg)`;
-
-  // Update each text element's transform to maintain outward-facing
   const elements = carousel.querySelectorAll('.carousel-text');
   elements.forEach((el, i) => {
     const angle = (360 / itemCount) * i;
-    el.style.transform = `rotateY(${angle}deg) translateZ(${radius}px) rotateY(${-angle - rotationY}deg)`;
+    el.style.transform = `rotateY(${angle}deg) translateZ(${radius}px) rotateY(-${angle + rotationY}deg)`;
+    const normAngle = ((angle + rotationY) % 360 + 360) % 360;
+    el.style.opacity = Math.max(0, Math.cos(normAngle * Math.PI / 180)).toFixed(2);
   });
-
-  // Fade each text element based on its angle //
-  elements.forEach((el, i) => {
-    const angle = (360 / itemCount) * i + rotationY;
-    const normalizedAngle = (angle % 360 + 360) % 360; // Normalize to [0, 360)
-    const opacity = Math.max(0, Math.cos(normalizedAngle * Math.PI / 180)); // Cosine fade
-    el.style.opacity = opacity.toFixed(2);
-  });
-
-
   requestAnimationFrame(animate);
 }
 animate();
