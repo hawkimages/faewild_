@@ -111,7 +111,7 @@ body, html {
   position: fixed;
   justify-content: center;
   text-align: center;
-  bottom: 25px;
+  bottom: 5dvh;
   font-family: 'Montserrat', sans-serif;
   font-size: clamp(0.5rem, 2vw, 1.5rem);
   color: #fff;
