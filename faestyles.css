@@ -50,10 +50,10 @@ filter {
 
 /* Container for the rotating text carousel */
 .carousel-container {
-  position: absolute;
+  position: fixed;
   z-index: 2;
   width: 100dvw;  /* Adjust size as needed */
-  height: 125vh;
+  height: 125vh; /* CAUTION: can break 3D */
   perspective: 1000px;
   overflow: visible;
   /* Optional: add border to visualize container */
@@ -64,7 +64,7 @@ filter {
 #carousel {
   position: absolute;
   left: 50%;
-  top: 40%;
+  top: clamp(50dvh,15rem,50rem);
   transform-style: preserve-3d;
 }
 
@@ -90,5 +90,4 @@ body, html {
     justify-content: center;
     align-items: center;
     flex-direction: column;
-
 }
