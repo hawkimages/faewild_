@@ -136,7 +136,7 @@ const resetSkyTemp = () => { updateBackgroundColor(); updateColorTemperature(); 
 function handleSkyAndTempInteraction(e, isDrag) {
   const rect = carouselContainer.getBoundingClientRect();
   const x = getClientX(e) - rect.left;
-  const center = rect.width / 2;
+  const center = rect.width / 1;
   const rel = (x - center) / center, hour = 12 + rel * 12;
   document.querySelector('.faewild .background').style.fill = getSkyColor(hour);
   if (skyColorTimeout) clearTimeout(skyColorTimeout);
