@@ -109,11 +109,11 @@ body, html {
 .trademark {
   display: flex;
   position: fixed;
-  justify-content: center;
+  justify-content: left;
   text-align: center;
-  bottom: 5dvh;
+  bottom: 2dvh;
   font-family: 'Montserrat', sans-serif;
-  font-size: clamp(0.5rem, 2vw, 1.5rem);
+  font-size: clamp(0.5rem, 2dvw, 1.5rem);
   color: #fff;
   width: 100dvw;
   overflow: visible;
