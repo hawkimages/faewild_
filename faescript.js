@@ -138,11 +138,10 @@ function handleSkyAndTempInteraction(e, isDrag) {
   const rect = carouselContainer.getBoundingClientRect();
   const x = getClientX(e) - rect.left;
   const center = rect.width / 1;
-  const rel = (x - center) / center, hour = 12 + rel * 12;
+  const rel = (-x + center) / center, hour = 0 + rel * 12;
   document.querySelector('.faewild .background').style.fill = getSkyColor(hour);
   if (skyColorTimeout) clearTimeout(skyColorTimeout);
   skyColorTimeout = setTimeout(resetSkyTemp, 5000);
-
   let factor = Math.max(-1, Math.min(1, rel < 0 ? -1 + (1 + rel) * 2 : 1 - (1 - rel) * 2));
   const colorTempMatrix = document.getElementById('colorTempMatrix');
   if (colorTempMatrix) colorTempMatrix.setAttribute('values', getColorTempMatrix(factor));
@@ -188,3 +187,15 @@ function animate() {
   requestAnimationFrame(animate);
 }
 animate();
+
+// fade out instructions after first mouse or touch input //
+const instructions = document.querySelector('.instructions');
+if (instructions) {
+  const fadeOutInstructions = () => {
+    instructions.style.transition = 'opacity 2s ease';
+    instructions.style.opacity = '0';
+    setTimeout(() => { instructions.style.display = 'none'; }, 2000);
+  };
+  carouselContainer.addEventListener('mousedown', fadeOutInstructions);
+  carouselContainer.addEventListener('touchstart', fadeOutInstructions);
+}
