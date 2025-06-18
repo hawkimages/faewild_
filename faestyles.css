@@ -107,10 +107,10 @@ body, html {
 }
 
 .trademark {
-  display: grid;
+  display: flex;
   position: fixed;
   justify-content: center;
-  text-align:center;
+  text-align: center;
   bottom: 25px;
   font-family: 'Montserrat', sans-serif;
   font-size: clamp(0.5rem, 2vw, 1.5rem);
