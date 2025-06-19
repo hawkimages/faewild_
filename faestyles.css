@@ -118,7 +118,9 @@ div.trademark {
   width: 100dvw;
   overflow: visible;
   border: 0px solid #fff; /* debug border */
-  pointer-events: all;
+  pointer-events: all; /* Allow clicks on the link */
+  text-decoration: none; /* Remove underline */
+  z-index: 100; /* Ensure it appears above other content */
 }
 
 .github-link {
@@ -133,5 +135,7 @@ div.trademark {
   width: 100dvw;
   overflow: visible;
   border: 0px solid #fff; /* debug border */
-  pointer-events: all;;
+  pointer-events:all; /* Allow clicks on the link */
+  text-decoration: none; /* Remove underline */
+  z-index: 100; /* Ensure it appears above other content */
 }
