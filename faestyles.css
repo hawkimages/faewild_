@@ -119,3 +119,17 @@ div.trademark {
   overflow: visible;
   border: 0px solid #fff; /* debug border */
 }
+
+.github-link {
+  display: flex;
+  position: absolute;
+  justify-content: center;
+  text-align: center;
+  top: 2dvh;
+  font-family: 'Montserrat', sans-serif;
+  font-size: clamp(0.5rem, 2dvw, 1.5rem);
+  color: #fff;
+  width: 100dvw;
+  overflow: visible;
+  border: 0px solid #fff; /* debug border */
+}
