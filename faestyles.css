@@ -104,6 +104,9 @@ div.instructions {
   width: clamp(100dvw, 50dvw, 40rem);
   overflow: visible;
   border: 0px solid #fff; /* debug border */
+  /* Slow blink timer */
+  animation: blink 1.5s infinite alternate;
+  pointer-events: none; /* Prevent text from blocking mouse events */
 }
 
 div.trademark {
