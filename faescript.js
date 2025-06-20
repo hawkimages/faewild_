@@ -68,7 +68,7 @@ if (moonContainer) {
 const carousel = document.getElementById('carousel'),
   texts = ['F', 'A', 'E', 'W', 'I', 'L', 'D'],
   // Responsive radius for all devices //
-  radius = Math.max(window.screenX, 205)
+  radius = Math.max(window.innerWidth, 205)
   itemCount = texts.length,
   carouselContainer = document.querySelector('.carousel-container');
 let rotationY = 0, velocityY = 0, isDragging = false, lastMouseX = 0, lastTimestamp = 0;
