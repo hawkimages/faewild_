@@ -126,6 +126,10 @@ div.trademark {
   z-index: 100; /* Ensure it appears above other content */
 }
 
+a {
+  color: white;
+}
+
 .github-link {
   display: flex;
   position: absolute;
