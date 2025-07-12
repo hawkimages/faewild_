@@ -166,27 +166,6 @@ carouselContainer.addEventListener('touchmove', handleHover);
 carouselContainer.addEventListener('mouseleave', endHover);
 carouselContainer.addEventListener('touchcancel', endHover);
 
-// --- ANIMATION LOOP ---
-function animate() {
-  if (isDragging && Math.abs(velocityY) > 0.01) {
-    rotationY += velocityY * 0.016; velocityY *= 0.93;
-    if (Math.abs(velocityY) < 0.01) velocityY = 0;
-  } else if (useHoverVelocity) {
-    rotationY += hoverVelocity;
-  } else {
-    rotationY += minVelocity * resumeSpinDirection;
-  }
-  carousel.style.transform = `translate(-50%, -50%) rotateY(${rotationY}deg)`;
-  const elements = carousel.querySelectorAll('.carousel-text');
-  elements.forEach((el, i) => {
-    const angle = (360 / itemCount) * i;
-    el.style.transform = `rotateY(${angle}deg) translateZ(${radius}px) rotateY(-${rotationY}deg)`;
-    const normAngle = ((angle + rotationY) % 360 + 360) % 360;
-    el.style.opacity = Math.max(0, Math.cos(normAngle * Math.PI / 180)).toFixed(2);
-  });
-  requestAnimationFrame(animate);
-}
-animate();
 
 // fade out instructions after first mouse or touch input //
 const instructions = document.querySelector('.instructions');

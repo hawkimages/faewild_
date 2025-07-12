@@ -75,7 +75,7 @@ filter {
   font-family: 'Montserrat', sans-serif;
   font-size: clamp(4rem, 15dvw, 7rem);
   color: transparent;
-  text-shadow: 0 0 11px rgba(255, 255, 255, 0.8);
+  /* text-shadow: 0 0 11px rgba(255, 255, 255, 0.8); */
   white-space: nowrap;
   user-select: none;
   pointer-events: none; /* Prevent text from blocking mouse events */
